@@ -1,0 +1,62 @@
+.topbar {
+  position: absolute;
+  top: 5%;              /* ← регулируй по вертикали (чем больше %, тем ниже) */
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 430px;          /* ← можно увеличить/уменьшить */
+  background: transparent; /* полностью убрали фон */
+  color: #fff;
+  z-index: 10;
+  pointer-events: none;  /* чтобы клики проходили сквозь TopBar */
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  pointer-events: auto;
+}
+
+.avatar {
+  width: 45px;           /* ← размер аватара */
+  height: 45px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 0px solid rgba(255, 255, 255, 0);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
+}
+
+.username {
+  font-size: 23px;        /* ← размер текста */
+  font-weight: 600;
+  letter-spacing: 0.7px;
+  margin-bottom: 4px;
+}
+
+.balance-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  background: rgba(65, 63, 64, 0.4); /* твой цвет с 40% прозрачностью */
+  padding: 6px 14px;
+  border-radius: 26px;
+  pointer-events: auto;
+}
+
+.balance-icon {
+  width: 30px;
+  height: 30px;
+  margin-top: 0px;
+  filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.1));
+}
+
+.balance-amount {
+  font-size: 23px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 2px;
+}
