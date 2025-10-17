@@ -1,15 +1,26 @@
+
 const API_URL = "https://gs-backend-3l5t.onrender.com";
 
 export async function authWithTelegram(initData) {
-  const res = await fetch(`${API_URL}/auth`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ initData }),
-  });
-  return res.json();
-}
+  try {
+    const response = await fetch(`${API_URL}/auth/telegram`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ init_data: initData }),
+    });
 
-export async function getBalance(userId) {
-  const res = await fetch(`${API_URL}/balance/${userId}`);
-  return res.json();
+    if (!response.ok) {
+      console.error("Ошибка при запросе авторизации:", response.status);
+      return null;
+    }
+
+    const data = await response.json();
+    console.log("Ответ от бэкенда:", data);
+    return data;
+  } catch (err) {
+    console.error("Ошибка соединения с API:", err);
+    return null;
+  }
 }
