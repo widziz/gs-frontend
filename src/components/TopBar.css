@@ -1,16 +1,19 @@
 .topbar {
   position: absolute;
-  top: 5%;              /* ← регулируй по вертикали (чем больше %, тем ниже) */
+  top: 10px;               /* фиксированный отступ от верхнего края */
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 430px;          /* ← можно увеличить/уменьшить */
-  background: transparent; /* полностью убрали фон */
+  width: 100%;
+  max-width: 430px;        /* максимум */
+  padding: 0 10px;         /* отступы от краёв экрана */
+  background: transparent;
   color: #fff;
   z-index: 10;
-  pointer-events: none;  /* чтобы клики проходили сквозь TopBar */
+  pointer-events: none;    /* клики проходят сквозь TopBar */
+  box-sizing: border-box;
 }
 
 .user-info {
@@ -18,22 +21,27 @@
   align-items: center;
   gap: 6px;
   pointer-events: auto;
+  flex-shrink: 0;           /* не сжимается слишком сильно */
 }
 
 .avatar {
-  width: 45px;           /* ← размер аватара */
+  width: 45px;           
   height: 45px;
   border-radius: 50%;
   object-fit: cover;
-  border: 0px solid rgba(255, 255, 255, 0);
+  border: 0;
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
+  flex-shrink: 0;          /* фиксированный размер */
 }
 
 .username {
-  font-size: 23px;        /* ← размер текста */
+  font-size: 23px;
   font-weight: 600;
   letter-spacing: 0.7px;
   margin-bottom: 4px;
+  white-space: nowrap;     /* не переносится */
+  overflow: hidden;
+  text-overflow: ellipsis; /* если не помещается, покажет ... */
 }
 
 .balance-container {
@@ -41,16 +49,16 @@
   align-items: center;
   gap: 8px;
   height: 32px;
-  background: rgba(65, 63, 64, 0.4); /* твой цвет с 40% прозрачностью */
+  background: rgba(65, 63, 64, 0.4);
   padding: 6px 14px;
   border-radius: 26px;
   pointer-events: auto;
+  flex-shrink: 0;
 }
 
 .balance-icon {
   width: 30px;
   height: 30px;
-  margin-top: 0px;
   filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.1));
 }
 
@@ -58,5 +66,24 @@
   font-size: 23px;
   font-weight: 600;
   color: #fff;
-  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 480px) {
+  .topbar {
+    max-width: 90%; /* чуть меньше экрана */
+    padding: 0 8px;
+  }
+
+  .avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .username, .balance-amount {
+    font-size: 18px;
+  }
 }
