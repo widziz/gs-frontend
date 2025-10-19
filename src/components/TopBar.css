@@ -8,7 +8,7 @@
   align-items: center;
   width: 100%;
   max-width: 420px;        /* максимум */
-  padding: 0 10px;         /* отступы от краёв экрана */
+  padding: 0 15px;         /* отступы от краёв экрана */
   background: transparent;
   color: #fff;
   z-index: 10;
