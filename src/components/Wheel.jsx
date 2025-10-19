@@ -109,7 +109,7 @@ export const Wheel = () => {
 
       {/* Перевернутый поинтер (теперь сверху) */}
       <div className="pointer" style={{ 
-        top: '12%', 
+        top: '112px', 
         bottom: 'auto',
         transform: 'translateX(-50%)'
       }}></div>

@@ -16,7 +16,7 @@ export const TopBar = ({ user }) => {
 
       <div className="balance-container">
         <img src={starIcon} alt="balance" className="balance-icon" />
-        <span className="balance-amount">{user.balance}</span>
+        <span className="balance-amount">{user?.balance ?? 0}</span>
       </div>
     </div>
   );

@@ -1,15 +1,16 @@
 export const wheelConfig = {
-  slots: 20,
+  slots: 21,
   centerX: 400,
   spinDuration: 5000,
   spinDeceleration: 0.95,
   centerY: 400,
-  outerRadius: 560,
+  outerRadius: 550,
   innerRadius: 375,
   gapWidth: 10,
   cornerRadius: 15,
   randomOffset: 8,
   prizes: [
+    { image: 'bear.svg', value: '15', chance: 9 },
     { image: 'bear.svg', value: '15', chance: 9 },
     { image: 'rose.svg', value: '25', chance: 15 },
     { image: 'bust.svg', value: 'Буст', chance: 12 },
