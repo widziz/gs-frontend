@@ -11,7 +11,7 @@ export const TopBar = ({ user }) => {
           alt={user.username}
           className="avatar"
         />
-        <span className="username">{user.username}</span>
+        <span className="username">@{user.username}</span>
       </div>
 
       <div className="balance-container">

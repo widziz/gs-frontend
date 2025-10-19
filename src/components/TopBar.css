@@ -7,7 +7,7 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  max-width: 430px;        /* максимум */
+  max-width: 420px;        /* максимум */
   padding: 0 10px;         /* отступы от краёв экрана */
   background: transparent;
   color: #fff;
@@ -69,21 +69,4 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-/* Мобильная адаптация */
-@media (max-width: 480px) {
-  .topbar {
-    max-width: 90%; /* чуть меньше экрана */
-    padding: 0 8px;
-  }
-
-  .avatar {
-    width: 36px;
-    height: 36px;
-  }
-
-  .username, .balance-amount {
-    font-size: 18px;
-  }
 }
