@@ -2,45 +2,50 @@
 
 class WheelAudio {
   constructor() {
-    this.audio = null;
-    this.isLoaded = false;
     this.isMobile = /Mobi|Android/i.test(navigator.userAgent);
+    this.audioCtx = null;
+    this.buffer = null;
+    this.isReady = false;
 
-    // 🔹 Предзагрузка звука (OGG — меньше лагает)
-    this.loadSound('/sounds/click.ogg');
+    this.init();
   }
 
-  async loadSound(src) {
+  async init() {
     try {
-      this.audio = new Audio(src);
-      this.audio.preload = 'auto';
-      this.audio.load();
+      // создаём аудио контекст (лениво)
+      this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-      // Когда загрузился — отмечаем
-      this.audio.addEventListener('canplaythrough', () => {
-        this.isLoaded = true;
-        console.log('✅ Звук предзагружен и кеширован');
-      });
-    } catch (error) {
-      console.error('Ошибка при загрузке звука:', error);
+      // загружаем и декодируем звук
+      const response = await fetch("/sounds/click.ogg");
+      const arrayBuffer = await response.arrayBuffer();
+      this.buffer = await this.audioCtx.decodeAudioData(arrayBuffer);
+      this.isReady = true;
+
+      console.log("✅ Web Audio звук загружен в память");
+    } catch (err) {
+      console.error("Ошибка при инициализации звука:", err);
     }
   }
 
   triggerFeedback() {
-    // 🔹 Вибрация (на телефонах)
+    // 🔹 Вибрация (только если доступна)
     if (navigator.vibrate && this.isMobile) {
-      navigator.vibrate(30); // короткая вибрация ~30мс
+      navigator.vibrate(25);
     }
 
-    // 🔹 Звук (на ПК и мобильных)
-    if (this.audio && this.isLoaded) {
-      try {
-        const clickClone = this.audio.cloneNode(); // чтобы не накладывался
-        clickClone.volume = 0.4;
-        clickClone.play().catch(() => {});
-      } catch (e) {
-        console.warn('Не удалось воспроизвести звук:', e);
-      }
+    // 🔹 Звук (если доступен)
+    if (this.isReady && this.audioCtx.state === "running") {
+      const source = this.audioCtx.createBufferSource();
+      source.buffer = this.buffer;
+
+      const gainNode = this.audioCtx.createGain();
+      gainNode.gain.value = 0.3; // громкость
+
+      source.connect(gainNode).connect(this.audioCtx.destination);
+      source.start(0);
+    } else if (this.audioCtx?.state === "suspended") {
+      // браузеры при старте ставят в "suspended" — активируем по первому клику
+      this.audioCtx.resume();
     }
   }
 }
