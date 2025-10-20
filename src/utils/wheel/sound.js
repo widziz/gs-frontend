@@ -1,53 +1,32 @@
 // src/utils/sound.js
-
-class WheelFeedback {
-  constructor() {
-    this.audioCtx = null;
-    this.buffer = null;
-    this.isLoaded = false;
-
-    this.init();
-  }
-
-  async init() {
-    try {
-      this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const resp = await fetch("/sounds/click.ogg");
-      const buf = await resp.arrayBuffer();
-      this.buffer = await this.audioCtx.decodeAudioData(buf);
-      this.isLoaded = true;
-    } catch (e) {
-      console.warn("Audio init failed:", e);
-    }
-  }
-
+export const wheelAudio = {
+  /**
+   * Универсальная вибрация для Telegram WebApp и браузера
+   */
   triggerFeedback() {
-    // 1) Telegram встроенная вибрация, если есть
-    if (window.Telegram?.WebApp?.HapticFeedback?.impactOccurred) {
-      try {
-        window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
-      } catch (e) {
-        console.warn("Telegram HapticFeedback error:", e);
+    try {
+      // ✅ 1. Telegram встроенная вибрация
+      if (
+        window.Telegram &&
+        window.Telegram.WebApp &&
+        window.Telegram.WebApp.HapticFeedback &&
+        typeof window.Telegram.WebApp.HapticFeedback.impactOccurred === "function"
+      ) {
+        window.Telegram.WebApp.HapticFeedback.impactOccurred("medium");
+        console.log("✅ Telegram haptic feedback triggered");
+        return;
       }
-    }
 
-    // 2) Web Vibration API как запасной вариант
-    if ('vibrate' in navigator) {
-      navigator.vibrate(25);
-    }
+      // ✅ 2. Фолбэк: стандартная вибрация браузера
+      if (navigator.vibrate) {
+        navigator.vibrate(30);
+        console.log("✅ Browser vibration triggered");
+        return;
+      }
 
-    // 3) Звук через Web Audio
-    if (this.isLoaded && this.buffer && this.audioCtx) {
-      const source = this.audioCtx.createBufferSource();
-      source.buffer = this.buffer;
-      const gain = this.audioCtx.createGain();
-      gain.gain.value = 0.3;
-      source.connect(gain).connect(this.audioCtx.destination);
-      source.start(0);
-    } else if (this.audioCtx?.state === 'suspended') {
-      this.audioCtx.resume();
+      console.warn("⚠️ Вибрация недоступна на этом устройстве.");
+    } catch (err) {
+      console.error("Ошибка при попытке вызвать вибрацию:", err);
     }
   }
-}
-
-export const wheelFeedback = new WheelFeedback();
+};
