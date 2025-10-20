@@ -3,50 +3,88 @@ import { wheelConfig } from '../utils/wheel/config';
 
 let spinGenerator = null;
 
-// === Новый класс без звука, только вибрация ===
 class WheelFeedback {
   constructor() {
     this.isEnabled = true;
+    this.sound = null;
+    this.canVibrate = false;
+    this.init();
   }
 
-  triggerFeedback() {
+  init() {
     try {
-      // ✅ Telegram Haptic Feedback (вибрация через WebApp API)
+      // Проверяем поддержку вибрации
+      this.canVibrate =
+        (window.Telegram?.WebApp?.HapticFeedback &&
+          typeof window.Telegram.WebApp.HapticFeedback.impactOccurred === "function") ||
+        "vibrate" in navigator;
+
+      // Загружаем лёгкий OGG звук (резерв)
+      this.sound = new Audio("/sounds/tick.ogg");
+      this.sound.volume = 0.1;
+      this.sound.preload = "auto";
+      this.sound.load();
+    } catch (e) {
+      console.warn("Feedback init error:", e);
+      this.isEnabled = false;
+    }
+  }
+
+  vibrate() {
+    try {
       if (
-        window.Telegram &&
-        window.Telegram.WebApp &&
-        window.Telegram.WebApp.HapticFeedback &&
+        window.Telegram?.WebApp?.HapticFeedback &&
         typeof window.Telegram.WebApp.HapticFeedback.impactOccurred === "function"
       ) {
         window.Telegram.WebApp.HapticFeedback.impactOccurred("medium");
-        return;
+        return true;
       }
 
-      // ✅ Fallback: системная вибрация браузера
       if (navigator.vibrate) {
-        navigator.vibrate(30);
+        navigator.vibrate(20);
+        return true;
       }
-    } catch (err) {
-      console.warn("Вибрация недоступна:", err);
+
+      return false;
+    } catch (e) {
+      console.warn("Vibration error:", e);
+      return false;
+    }
+  }
+
+  playSound() {
+    if (!this.sound) return;
+    try {
+      this.sound.currentTime = 0;
+      this.sound.play().catch(() => {});
+    } catch (e) {}
+  }
+
+  triggerFeedback() {
+    if (!this.isEnabled) return;
+
+    const didVibrate = this.vibrate();
+
+    if (!didVibrate) {
+      // Если вибрации нет — звук
+      this.playSound();
     }
   }
 }
 
 const wheelAudio = new WheelFeedback();
 
-// === генератор ===
 export function initSpinGenerator() {
   spinGenerator = createSpinGenerator(wheelConfig);
 }
 
 export function spinWheel(options = {}) {
   if (!spinGenerator) {
-    throw new Error('Spin generator not initialized. Call initSpinGenerator() first.');
+    throw new Error("Spin generator not initialized. Call initSpinGenerator() first.");
   }
   return spinGenerator.generate(options);
 }
 
-// === логика вращения ===
 export const startSpinAdvanced = ({
   currentRotation = 0,
   slots = 20,
@@ -54,11 +92,11 @@ export const startSpinAdvanced = ({
   generateOptions = {},
   onGenerate,
   onUpdate,
-  onComplete
+  onComplete,
 }) => {
   const resultGenerator = generator || spinGenerator;
   if (!resultGenerator) {
-    throw new Error('Spin generator not initialized.');
+    throw new Error("Spin generator not initialized.");
   }
 
   const spinResult = resultGenerator.generate(generateOptions);
@@ -114,9 +152,9 @@ export const startSpinAdvanced = ({
     const now = Date.now();
 
     const clickPosition = (normalizedAngle - FIRST_CLICK_OFFSET + 360) % 360;
-    const currentClickAngle = Math.floor(clickPosition / CLICK_INTERVAL) * CLICK_INTERVAL + FIRST_CLICK_OFFSET;
+    const currentClickAngle =
+      Math.floor(clickPosition / CLICK_INTERVAL) * CLICK_INTERVAL + FIRST_CLICK_OFFSET;
 
-    // === Вибрация при каждом клике ===
     if (currentClickAngle !== lastClickAngle && now - lastClickTime > 50) {
       wheelAudio.triggerFeedback();
       lastClickTime = now;
@@ -144,7 +182,7 @@ export const startSpinAdvanced = ({
 
   return {
     cancel: () => cancelAnimationFrame(animationId),
-    result: spinResult
+    result: spinResult,
   };
 };
 
