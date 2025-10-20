@@ -1,11 +1,7 @@
-// src/utils/sound.js
 export const wheelAudio = {
-  /**
-   * Универсальная вибрация для Telegram WebApp и браузера
-   */
   triggerFeedback() {
     try {
-      // ✅ 1. Telegram встроенная вибрация
+      // ✅ Telegram WebApp haptic feedback
       if (
         window.Telegram &&
         window.Telegram.WebApp &&
@@ -17,7 +13,7 @@ export const wheelAudio = {
         return;
       }
 
-      // ✅ 2. Фолбэк: стандартная вибрация браузера
+      // ✅ Браузерная вибрация (fallback)
       if (navigator.vibrate) {
         navigator.vibrate(30);
         console.log("✅ Browser vibration triggered");
@@ -26,7 +22,7 @@ export const wheelAudio = {
 
       console.warn("⚠️ Вибрация недоступна на этом устройстве.");
     } catch (err) {
-      console.error("Ошибка при попытке вызвать вибрацию:", err);
+      console.error("Ошибка при вибрации:", err);
     }
   }
 };

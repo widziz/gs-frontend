@@ -3,57 +3,38 @@ import { wheelConfig } from '../utils/wheel/config';
 
 let spinGenerator = null;
 
-class WheelAudio {
+// === Новый класс без звука, только вибрация ===
+class WheelFeedback {
   constructor() {
-    this.clickSound = null;
     this.isEnabled = true;
-    this.init();
-  }
-
-  init() {
-    try {
-      this.clickSound = new Audio('/sounds/tick.mp3');
-      this.clickSound.load();
-    } catch (e) {
-      console.warn("Sound init error:", e);
-      this.isEnabled = false;
-    }
-  }
-
-  playClick() {
-    if (!this.isEnabled || !this.clickSound) return;
-    
-    try {
-      this.clickSound.currentTime = 0;
-      this.clickSound.volume = 0.1;
-      this.clickSound.play().catch(() => {
-        this.isEnabled = false;
-      });
-    } catch (e) {
-      this.isEnabled = false;
-    }
-  }
-
-  vibrate() {
-    if (!this.isEnabled || !('vibrate' in navigator)) return;
-    
-    try {
-      if (window.innerWidth <= 768) {
-        navigator.vibrate(10);
-      }
-    } catch (e) {
-      console.warn("Vibration error:", e);
-    }
   }
 
   triggerFeedback() {
-    this.playClick();
-    this.vibrate();
+    try {
+      // ✅ Telegram Haptic Feedback (вибрация через WebApp API)
+      if (
+        window.Telegram &&
+        window.Telegram.WebApp &&
+        window.Telegram.WebApp.HapticFeedback &&
+        typeof window.Telegram.WebApp.HapticFeedback.impactOccurred === "function"
+      ) {
+        window.Telegram.WebApp.HapticFeedback.impactOccurred("medium");
+        return;
+      }
+
+      // ✅ Fallback: системная вибрация браузера
+      if (navigator.vibrate) {
+        navigator.vibrate(30);
+      }
+    } catch (err) {
+      console.warn("Вибрация недоступна:", err);
+    }
   }
 }
 
-const wheelAudio = new WheelAudio();
+const wheelAudio = new WheelFeedback();
 
+// === генератор ===
 export function initSpinGenerator() {
   spinGenerator = createSpinGenerator(wheelConfig);
 }
@@ -65,6 +46,7 @@ export function spinWheel(options = {}) {
   return spinGenerator.generate(options);
 }
 
+// === логика вращения ===
 export const startSpinAdvanced = ({
   currentRotation = 0,
   slots = 20,
@@ -106,12 +88,12 @@ export const startSpinAdvanced = ({
       const phaseProgress = t / ACCELERATION_PHASE;
       return easeInCubic(phaseProgress) * 0.3;
     }
-    
+
     if (t < ACCELERATION_PHASE + MAX_SPEED_PHASE) {
       const phaseElapsed = t - ACCELERATION_PHASE;
       return 0.3 + (phaseElapsed / MAX_SPEED_PHASE) * 0.4;
     }
-    
+
     const phaseElapsed = t - (ACCELERATION_PHASE + MAX_SPEED_PHASE);
     const phaseProgress = phaseElapsed / DECELERATION_PHASE;
     return 0.7 + easeOutCubic(phaseProgress) * 0.3;
@@ -134,6 +116,7 @@ export const startSpinAdvanced = ({
     const clickPosition = (normalizedAngle - FIRST_CLICK_OFFSET + 360) % 360;
     const currentClickAngle = Math.floor(clickPosition / CLICK_INTERVAL) * CLICK_INTERVAL + FIRST_CLICK_OFFSET;
 
+    // === Вибрация при каждом клике ===
     if (currentClickAngle !== lastClickAngle && now - lastClickTime > 50) {
       wheelAudio.triggerFeedback();
       lastClickTime = now;
